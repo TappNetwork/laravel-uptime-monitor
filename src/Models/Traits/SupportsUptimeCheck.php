@@ -47,7 +47,7 @@ trait SupportsUptimeCheck
             return true;
         }
 
-        return $this->uptime_last_check_date->diffInMinutes() >= $this->uptime_check_interval_in_minutes;
+        return ((int) abs($this->uptime_last_check_date->diffInMinutes())) >= $this->uptime_check_interval_in_minutes;
     }
 
     public function uptimeRequestSucceeded(ResponseInterface $response): void
@@ -128,7 +128,7 @@ trait SupportsUptimeCheck
             return false;
         }
 
-        if ($this->uptime_check_failed_event_fired_on_date->diffInMinutes() >= config('uptime-monitor.notifications.resend_uptime_check_failed_notification_every_minutes')) {
+        if (((int) abs($this->uptime_check_failed_event_fired_on_date->diffInMinutes())) >= config('uptime-monitor.notifications.resend_uptime_check_failed_notification_every_minutes')) {
             return true;
         }
 

@@ -101,6 +101,6 @@ class SupportsUptimeCheckTest extends TestCase
     {
         $this->monitor = $this->monitor->fresh();
 
-        return $this->monitor->$attribute->diffInMinutes() === 0;
+        return ((int) abs($this->monitor->$attribute->diffInMinutes())) === 0;
     }
 }
