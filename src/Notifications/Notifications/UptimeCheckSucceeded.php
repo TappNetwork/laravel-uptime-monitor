@@ -4,8 +4,8 @@ namespace Spatie\UptimeMonitor\Notifications\Notifications;
 
 use Carbon\Carbon;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Messages\SlackAttachment;
-use Illuminate\Notifications\Messages\SlackMessage;
+use Illuminate\Notifications\Slack\BlockKit\Blocks\SectionBlock;
+use Illuminate\Notifications\Slack\SlackMessage;
 use Spatie\UptimeMonitor\Events\UptimeCheckSucceeded as MonitorSucceededEvent;
 use Spatie\UptimeMonitor\Models\Enums\UptimeStatus;
 use Spatie\UptimeMonitor\Notifications\BaseNotification;
@@ -34,15 +34,16 @@ class UptimeCheckSucceeded extends BaseNotification
         return $mailMessage;
     }
 
-    public function toSlack($notifiable)
+    public function toSlack($notifiable): SlackMessage
     {
         return (new SlackMessage())
-            ->attachment(function (SlackAttachment $attachment) {
-                $attachment
-                    ->title($this->getMessageText())
-                    ->fallback($this->getMessageText())
-                    ->footer($this->getLocationDescription())
-                    ->timestamp(Carbon::now());
+            ->headerBlock($this->getMessageText())
+            ->sectionBlock(function (SectionBlock $block) {
+                $block->field("*Location*\n".$this->getLocationDescription())->markdown();
+            })
+            ->dividerBlock()
+            ->sectionBlock(function (SectionBlock $block) {
+                $block->text(Carbon::now());
             });
     }
 

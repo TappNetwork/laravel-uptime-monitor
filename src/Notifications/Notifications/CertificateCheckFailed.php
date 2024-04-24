@@ -4,8 +4,8 @@ namespace Spatie\UptimeMonitor\Notifications\Notifications;
 
 use Carbon\Carbon;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Messages\SlackAttachment;
-use Illuminate\Notifications\Messages\SlackMessage;
+use Illuminate\Notifications\Slack\BlockKit\Blocks\SectionBlock;
+use Illuminate\Notifications\Slack\SlackMessage;
 use Spatie\UptimeMonitor\Events\CertificateCheckFailed as InValidCertificateFoundEvent;
 use Spatie\UptimeMonitor\Notifications\BaseNotification;
 
@@ -33,17 +33,17 @@ class CertificateCheckFailed extends BaseNotification
         return $mailMessage;
     }
 
-    public function toSlack($notifiable)
+    public function toSlack($notifiable): SlackMessage
     {
         return (new SlackMessage())
-            ->error()
-            ->attachment(function (SlackAttachment $attachment) {
-                $attachment
-                    ->title($this->getMessageText())
-                    ->content($this->getMonitor()->certificate_check_failure_reason)
-                    ->fallback($this->getMessageText())
-                    ->footer($this->getMonitor()->certificate_issuer)
-                    ->timestamp(Carbon::now());
+            ->headerBlock($this->getMessageText())
+            ->sectionBlock(function (SectionBlock $block) {
+                $block->text($this->getMonitor()->certificate_check_failure_reason);
+                $block->field("*Issuer*\n".$this->getMonitor()->certificate_issuer)->markdown();
+            })
+            ->dividerBlock()
+            ->sectionBlock(function (SectionBlock $block) {
+                $block->text(Carbon::now());
             });
     }
 
